@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar: pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<a class="skip" href="#board">Skip to the board</a>
+<header class="top">
+  <div class="brand">
+    <span class="mark" aria-hidden="true">◉</span>
+    <div>
+      <h1>Token Radar</h1>
+      <p>Pre-token protocols, ranked by implied launch value</p>
+    </div>
+  </div>
+  <div class="meta">
+    <span id="asof">Snapshot 2026-11-14</span>
+    <span id="modelver">Model radar-2</span>
+  </div>
+</header>
+
+<main>
+  <section class="hero" aria-label="Summary">
+    <p class="lede">Every protocol the snapshot records without a token, scored on its own figures. The watchlist is the floor; the early rows are the radar's finds.</p>
+    <dl class="stats" id="stats"></dl>
+  </section>
+
+  <section class="controls" aria-label="Board controls">
+    <label class="search">Search
+      <input id="q" type="search" placeholder="Protocol, category or chain" autocomplete="off">
+    </label>
+    <label>Category
+      <select id="category"><option value="all">All categories</option></select>
+    </label>
+    <label>Chain
+      <select id="chain"><option value="all">All chains</option></select>
+    </label>
+    <label class="check"><input id="watchonly" type="checkbox"> Watchlist only</label>
+    <div class="tabs" role="tablist" aria-label="Board view">
+      <button id="tab-pre" role="tab" aria-selected="true">Pre-token board</button>
+      <button id="tab-live" role="tab" aria-selected="false">Live tokens</button>
+    </div>
+  </section>
+
+  <section id="board" aria-label="Ranked board">
+    <p class="count" id="count"></p>
+    <div class="tablewrap">
+      <table id="table">
+        <thead>
+          <tr>
+            <th data-sort="rank" aria-sort="descending">Rank</th>
+            <th data-sort="name">Protocol</th>
+            <th data-sort="tvl_usd">TVL</th>
+            <th data-sort="change_7d">7d</th>
+            <th data-sort="age_days">Age</th>
+            <th data-sort="multiple">Multiple</th>
+            <th data-sort="implied_value_usd">Implied value</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="hint">Click a row for the model breakdown and the farm plan. Click a column heading to sort.</p>
+  </section>
+
+  <section class="model" aria-label="How the ranking works">
+    <h2>How the ranking works</h2>
+    <p class="formula">implied value = TVL × multiple × growth × maturity × breadth</p>
+    <ul class="formula-parts">
+      <li><strong>Multiple</strong> — the median market-cap-to-TVL of the snapshot's own live-token protocols in the same category (at least 3 of them); otherwise the median across every live-token protocol. Clamped to 0.05 – 1.50.</li>
+      <li><strong>Growth</strong> — 1 + clamp(7-day change, −40%, +80%) × 0.4.</li>
+      <li><strong>Maturity</strong> — 0.70 + 0.30 × min(age, 1095 days) / 1095. Unknown age counts as 365 days.</li>
+      <li><strong>Breadth</strong> — 1 + 0.02 × min(chains − 1, 4).</li>
+    </ul>
+    <p>No protocol name is ever special-cased: the same function scores every row. Wrapped, staked and bridged products of tokens that already trade are kept out, as are exchange products and versioned names — they will not launch a token of their own.</p>
+    <h3>Calibration: where each multiple comes from</h3>
+    <div class="tablewrap">
+      <table id="calibration">
+        <thead><tr><th>Category</th><th>Multiple</th><th>Live comps</th><th>Source</th></tr></thead>
+        <tbody id="calibration-rows"></tbody>
+      </table>
+    </div>
+    <p class="disclaimer">Implied value is a model, not a promise: it says what a launch would be worth if the protocol priced like the live-token protocols in its category. "Pre-token" means the snapshot records no token — not that a token will ever exist.</p>
+  </section>
+</main>
+
+<footer>
+  <p>Source: DefiLlama protocols snapshot, sealed input, as of the date above. Board and farm plans generated from that snapshot alone; nothing on this page fetches the network.</p>
+  <p>Farm plans are starting points, not advice. Smart-contract risk is real: start small, use the protocol's own links, never share a seed phrase, and never pay to claim an airdrop.</p>
+</footer>
+
+<dialog id="detail" aria-label="Protocol detail">
+  <form method="dialog"><button class="close" aria-label="Close">✕</button></form>
+  <div id="detail-body"></div>
+</dialog>
+
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
