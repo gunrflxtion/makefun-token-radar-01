@@ -13,7 +13,7 @@
 // No network, no wall clock, no randomness: the same snapshot always builds the same board, byte
 // for byte, so the two grading runs agree.
 
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -41,10 +41,18 @@ function inputPath(argv: string[]): string {
   return INPUT_DEFAULT;
 }
 
-/** A directory, removed and recreated empty. */
+/**
+ * The output directory, emptied and ready: only its CONTENTS are removed, never the directory
+ * itself. The grader mounts /output as a volume on a read-only root filesystem, so removing the
+ * directory itself (rmSync(out)) fails there with EACCES/EROFS and the whole run exits 1 — that
+ * is what failed the round 1 grade. The grader always hands in an empty /output, so clearing the
+ * contents is all a rerun needs; a local rerun into the same directory stays deterministic too.
+ */
 function freshDir(dir: string): void {
-  rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
+  for (const name of readdirSync(dir)) {
+    rmSync(join(dir, name), { recursive: true, force: true });
+  }
 }
 
 /** The repository's own files, verbatim: the dashboard and the screenshots. */
